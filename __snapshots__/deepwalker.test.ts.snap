@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`deepwalker should get data from object  by mask 1`] = `
+Array [
+  1,
+  4,
+  7,
+  13,
+  40,
+]
+`;
+
+exports[`deepwalker should get data from object  by mask to hash 1`] = `
+Object {
+  "facebook": 1,
+  "instagram": 13,
+  "linkedin": 7,
+  "twitter": 4,
+  "youtube": 40,
+}
+`;
+
+exports[`deepwalker should get data from object  by mask to nested hash 1`] = `
+Object {
+  "desktop": Object {
+    "facebook": 10,
+    "instagram": 3,
+    "linkedin": 7,
+    "twitter": 22,
+    "youtube": 1,
+  },
+  "mobile": Object {
+    "facebook": 1,
+    "instagram": 13,
+    "linkedin": 7,
+    "twitter": 4,
+    "youtube": 40,
+  },
+}
+`;
+
+exports[`deepwalker should get data from object  by simple path 1`] = `1`;
