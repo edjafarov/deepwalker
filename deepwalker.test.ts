@@ -83,9 +83,12 @@ cr
 // each('compare.mobile.*.difference', (v)=>{})
 // get('compare.mobile.facebook.difference') > 10
 filter('compare.*.*.session_share', essential_share)
-function(el){
+function byValue(el){
   el.value
   el.dim1
   el.dim2
 }
+
+deepwalker(obj).get('compare.*.*.difference').sort(byValue).filter(essential_share).map(action)
+
 */

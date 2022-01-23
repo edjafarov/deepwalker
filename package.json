@@ -1,11 +1,13 @@
 {
   "name": "deepwalker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "deepwalker.js",
+  "types": "deepwalker.ts",
   "scripts": {
     "test": "node ./node_modules/jest/bin/jest.js",
-    "test-dev": "node ./node_modules/jest/bin/jest.js --watch"
+    "test-dev": "node ./node_modules/jest/bin/jest.js --watch",
+    "build": "tsc deepwalker.ts"
   },
   "author": "",
   "license": "ISC",

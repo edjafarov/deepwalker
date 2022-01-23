@@ -9,6 +9,7 @@ type DeepwalkerResult = Deepwalker & {
 export function deepwalker(object: any): Deepwalker {
   const instance = {
     _value: object,
+    _result: null,
     get: function (queryPath: string): DeepwalkerResult {
       return instanceResult.setResult(walker(queryPath.split("."), object));
     }
@@ -17,26 +18,40 @@ export function deepwalker(object: any): Deepwalker {
   const instanceResult = {
     _result: null,
     ...instance,
-    toValue: function () {
-      return instanceResult?._result[0]?.value;
+    toValue: function (path) {
+
+      return path ? instanceResult?._result[0]?.value[path] : instanceResult?._result[0]?.value;
     },
     filter: function (filterFn) {
-      return instanceResult.setResult(instanceResult._result.call.filter(instanceResult, filterFn))
+      return instanceResult.setResult(instanceResult._result.filter(filterFn))
     },
     sort: function (sortFn) {
-      return instanceResult.setResult(instanceResult._result.call.filter(instanceResult, sortFn))
+      instanceResult._result.sort(sortFn)
+      return instanceResult;
+    },
+    slice: function (number) {
+      instanceResult._result = instanceResult._result.slice(0, number)
+      return instanceResult;
     },
     toValues: function () {
       return instanceResult._result.map(r => r.value);
     },
-    toMap: function () {
+    toString: function (transformer) {
+      if (!instanceResult._result || instanceResult._result.length == 0) return '';
+      return transformer(instanceResult._result)
+    },
+    haveResults: function () {
+      if (!instanceResult._result || instanceResult._result.length == 0) return false;
+      return true;
+    },
+    toMap: function (path) {
       return instanceResult._result.reduce((res, r, i) => {
         let deepResult = res;
         r.dimensions.forEach((dim, i) => {
           if (!deepResult[dim] && i !== (r.dimensions.length - 1)) {
             deepResult[dim] = {};
           }
-          if (i === (r.dimensions.length - 1)) deepResult[dim] = r.value;
+          if (i === (r.dimensions.length - 1)) deepResult[dim] = path ? r.value[path] : r.value;
           deepResult = deepResult[dim];
         })
         return res;
