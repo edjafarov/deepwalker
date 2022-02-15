@@ -38,7 +38,7 @@ export function deepwalker(object: any): Deepwalker {
     },
     toString: function (transformer) {
       if (!instanceResult._result || instanceResult._result.length == 0) return '';
-      return transformer(instanceResult._result)
+      return transformer(createResultsObject(instanceResult._result))
     },
     haveResults: function () {
       if (!instanceResult._result || instanceResult._result.length == 0) return false;
@@ -65,6 +65,16 @@ export function deepwalker(object: any): Deepwalker {
   }
   return instance;
 }
+
+
+function createResultsObject(results) {
+  const newResultsObject = [...results] as any;
+  newResultsObject.getOne = (dims) => {
+    return (results.find((result) => !result.dimensions.filter((d, i) => d !== dims[i]).length) || {}).value
+  }
+  return newResultsObject
+}
+
 
 type DeepResult = {
   dimensions: Array<string>,

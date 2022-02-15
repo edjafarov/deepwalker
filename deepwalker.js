@@ -45,7 +45,7 @@ function deepwalker(object) {
         }, toString: function (transformer) {
             if (!instanceResult._result || instanceResult._result.length == 0)
                 return '';
-            return transformer(instanceResult._result);
+            return transformer(createResultsObject(instanceResult._result));
         }, haveResults: function () {
             if (!instanceResult._result || instanceResult._result.length == 0)
                 return false;
@@ -70,6 +70,13 @@ function deepwalker(object) {
     return instance;
 }
 exports.deepwalker = deepwalker;
+function createResultsObject(results) {
+    var newResultsObject = __spreadArray([], results, true);
+    newResultsObject.getOne = function (dims) {
+        return (results.find(function (result) { return !result.dimensions.filter(function (d, i) { return d !== dims[i]; }).length; }) || {}).value;
+    };
+    return newResultsObject;
+}
 function walker(pathArray, object, result, i) {
     if (i === void 0) { i = 0; }
     if (pathArray.length == 0) {
