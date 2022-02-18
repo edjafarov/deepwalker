@@ -26,47 +26,78 @@ function deepwalker(object) {
         _value: object,
         _result: null,
         get: function (queryPath) {
+            var instanceResult = __assign(__assign({ _result: null }, instance), { toValue: function (path) {
+                    var _a, _b;
+                    return path ? (_a = instanceResult === null || instanceResult === void 0 ? void 0 : instanceResult._result[0]) === null || _a === void 0 ? void 0 : _a.value[path] : (_b = instanceResult === null || instanceResult === void 0 ? void 0 : instanceResult._result[0]) === null || _b === void 0 ? void 0 : _b.value;
+                }, filter: function (filterFn) {
+                    return instanceResult.setResult(instanceResult._result.filter(filterFn));
+                }, sort: function (sortFn) {
+                    instanceResult._result.sort(sortFn);
+                    return instanceResult;
+                }, pick: function (array) {
+                    instanceResult._result = instanceResult._result.map(function (el) {
+                        return __assign(__assign({}, el), { value: Object.fromEntries(Object.entries(el.value)
+                                .filter(function (_a) {
+                                var key = _a[0];
+                                return array.includes(key);
+                            })) });
+                    });
+                    return instanceResult;
+                }, flatten: function (array) {
+                    if (array === void 0) { array = []; }
+                    instanceResult._result = instanceResult._result.reduce(function (result, el) {
+                        var arrayOfValues = Object.keys(el.value).filter(function (key) { return array.includes(key); }).map(function (key) {
+                            return {
+                                dimensions: el.dimensions.concat(key), value: __assign(__assign({}, Object.fromEntries(Object.entries(el.value)
+                                    .filter(function (_a) {
+                                    var key = _a[0];
+                                    return !array.includes(key);
+                                }))), { value: el.value[key] })
+                            };
+                        });
+                        return result.concat(arrayOfValues);
+                    }, []);
+                    return instanceResult;
+                }, concat: function (instance) {
+                    instanceResult._result = instanceResult._result.concat(instance._result);
+                    return instanceResult;
+                }, slice: function (number) {
+                    instanceResult._result = instanceResult._result.slice(0, number);
+                    return instanceResult;
+                }, toValues: function () {
+                    return instanceResult._result.map(function (r) { return r.value; });
+                }, toString: function (transformer) {
+                    if (!instanceResult._result || instanceResult._result.length == 0)
+                        return '';
+                    return transformer(createResultsObject(instanceResult._result));
+                }, convertEach: function (converter) {
+                    if (!instanceResult._result || instanceResult._result.length == 0)
+                        return [];
+                    return instanceResult._result.map(converter);
+                }, haveResults: function () {
+                    if (!instanceResult._result || instanceResult._result.length == 0)
+                        return false;
+                    return true;
+                }, toMap: function (path) {
+                    return instanceResult._result.reduce(function (res, r, i) {
+                        var deepResult = res;
+                        r.dimensions.forEach(function (dim, i) {
+                            if (!deepResult[dim] && i !== (r.dimensions.length - 1)) {
+                                deepResult[dim] = {};
+                            }
+                            if (i === (r.dimensions.length - 1))
+                                deepResult[dim] = path ? r.value[path] : r.value;
+                            deepResult = deepResult[dim];
+                        });
+                        return res;
+                    }, {});
+                }, setResult: function (result) {
+                    instanceResult._result = result;
+                    return instanceResult;
+                } });
             return instanceResult.setResult(walker(queryPath.split("."), object));
         }
     };
-    var instanceResult = __assign(__assign({ _result: null }, instance), { toValue: function (path) {
-            var _a, _b;
-            return path ? (_a = instanceResult === null || instanceResult === void 0 ? void 0 : instanceResult._result[0]) === null || _a === void 0 ? void 0 : _a.value[path] : (_b = instanceResult === null || instanceResult === void 0 ? void 0 : instanceResult._result[0]) === null || _b === void 0 ? void 0 : _b.value;
-        }, filter: function (filterFn) {
-            return instanceResult.setResult(instanceResult._result.filter(filterFn));
-        }, sort: function (sortFn) {
-            instanceResult._result.sort(sortFn);
-            return instanceResult;
-        }, slice: function (number) {
-            instanceResult._result = instanceResult._result.slice(0, number);
-            return instanceResult;
-        }, toValues: function () {
-            return instanceResult._result.map(function (r) { return r.value; });
-        }, toString: function (transformer) {
-            if (!instanceResult._result || instanceResult._result.length == 0)
-                return '';
-            return transformer(createResultsObject(instanceResult._result));
-        }, haveResults: function () {
-            if (!instanceResult._result || instanceResult._result.length == 0)
-                return false;
-            return true;
-        }, toMap: function (path) {
-            return instanceResult._result.reduce(function (res, r, i) {
-                var deepResult = res;
-                r.dimensions.forEach(function (dim, i) {
-                    if (!deepResult[dim] && i !== (r.dimensions.length - 1)) {
-                        deepResult[dim] = {};
-                    }
-                    if (i === (r.dimensions.length - 1))
-                        deepResult[dim] = path ? r.value[path] : r.value;
-                    deepResult = deepResult[dim];
-                });
-                return res;
-            }, {});
-        }, setResult: function (result) {
-            instanceResult._result = result;
-            return instanceResult;
-        } });
     return instance;
 }
 exports.deepwalker = deepwalker;
