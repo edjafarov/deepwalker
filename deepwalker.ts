@@ -2,8 +2,99 @@
 type Deepwalker = {
   get: Function
 }
-type DeepwalkerResult = Deepwalker & {
+type DeepwalkerResult = InstanceResult & {
   toValues: Function
+}
+
+class InstanceResult {
+
+  result: object;
+
+  constructor(result: object) {
+    this.result = result;
+  }
+
+  toValue = function (this: any, path: any) {
+    return path ? this?._result[0]?.value[path] : this?.result[0]?.value;
+  }
+  filter = function (this: any, filterFn: Function) {
+    return this.setResult(this.result.filter(filterFn))
+  }
+  sort = function (this: any, sortFn: Function) {
+    this.result.sort(sortFn)
+    return this;
+  }
+  pick = function (this: any, array: Array<any>) {
+    this.result = this.result.map((el) => {
+      return {
+        ...el,
+        value: Object.fromEntries(
+          Object.entries(el.value)
+            .filter(([key]) => array.includes(key))
+        )
+      }
+    })
+    return this;
+  }
+  flatten = function (this: any, array: any = []) {
+    this.result = this.result.reduce((result, el) => {
+
+      const arrayOfValues = Object.keys(el.value).filter(key => array.includes(key)).map((key) => {
+
+        return {
+          dimensions: el.dimensions.concat(key), value: {
+            ...Object.fromEntries(
+              Object.entries(el.value)
+                .filter(([key]) => !array.includes(key))
+            ),
+            value: el.value[key]
+          }
+        }
+      })
+      return result.concat(arrayOfValues);
+    }, []);
+    return this;
+  }
+  concat = function (this: any, instance) {
+    this.result = this.result.concat(instance.result);
+    return this;
+  }
+  slice = function (this: any, number) {
+    this.result = this.result.slice(0, number)
+    return this;
+  }
+  toValues = function (this: any) {
+    return this.result.map(r => r.value);
+  }
+  toString = function (this: any, transformer) {
+    if (!this.result || this.result.length == 0) return '';
+    return transformer(createResultsObject(this.result))
+  }
+  convertEach = function (this: any, converter) {
+    if (!this.result || this.result.length == 0) return [];
+    return this.result.map(converter);
+  }
+  haveResults = function (this: any) {
+    if (!this.result || this.result.length == 0) return false;
+    return true;
+  }
+  toMap = function (this: any, path) {
+    return this.result.reduce((res, r, i) => {
+      let deepResult = res;
+      r.dimensions.forEach((dim, i) => {
+        if (!deepResult[dim] && i !== (r.dimensions.length - 1)) {
+          deepResult[dim] = {};
+        }
+        if (i === (r.dimensions.length - 1)) deepResult[dim] = path ? r.value[path] : r.value;
+        deepResult = deepResult[dim];
+      })
+      return res;
+    }, {});
+  }
+  setResult = function (this: any, result) {
+    this.result = result;
+    return this;
+  }
 }
 
 export function deepwalker(object: any): Deepwalker {
@@ -11,94 +102,10 @@ export function deepwalker(object: any): Deepwalker {
     _value: object,
     _result: null,
     get: function (queryPath: string): DeepwalkerResult {
-      const instanceResult = {
-        _result: null,
-        ...instance,
-        toValue: function (path) {
-
-          return path ? instanceResult?._result[0]?.value[path] : instanceResult?._result[0]?.value;
-        },
-        filter: function (filterFn) {
-          return instanceResult.setResult(instanceResult._result.filter(filterFn))
-        },
-        sort: function (sortFn) {
-          instanceResult._result.sort(sortFn)
-          return instanceResult;
-        },
-        pick: function (array) {
-          instanceResult._result = instanceResult._result.map((el) => {
-            return {
-              ...el,
-              value: Object.fromEntries(
-                Object.entries(el.value)
-                  .filter(([key]) => array.includes(key))
-              )
-            }
-          })
-          return instanceResult;
-        },
-        flatten: function (array = []) {
-          instanceResult._result = instanceResult._result.reduce((result, el) => {
-
-            const arrayOfValues = Object.keys(el.value).filter(key => array.includes(key)).map((key) => {
-
-              return {
-                dimensions: el.dimensions.concat(key), value: {
-                  ...Object.fromEntries(
-                    Object.entries(el.value)
-                      .filter(([key]) => !array.includes(key))
-                  ),
-                  value: el.value[key]
-                }
-              }
-            })
-            return result.concat(arrayOfValues);
-          }, []);
-          return instanceResult;
-        },
-        concat: function (instance) {
-          instanceResult._result = instanceResult._result.concat(instance._result);
-          return instanceResult;
-        },
-        slice: function (number) {
-          instanceResult._result = instanceResult._result.slice(0, number)
-          return instanceResult;
-        },
-        toValues: function () {
-          return instanceResult._result.map(r => r.value);
-        },
-        toString: function (transformer) {
-          if (!instanceResult._result || instanceResult._result.length == 0) return '';
-          return transformer(createResultsObject(instanceResult._result))
-        },
-        convertEach: function (converter) {
-          if (!instanceResult._result || instanceResult._result.length == 0) return [];
-          return instanceResult._result.map(converter);
-        },
-        haveResults: function () {
-          if (!instanceResult._result || instanceResult._result.length == 0) return false;
-          return true;
-        },
-        toMap: function (path) {
-          return instanceResult._result.reduce((res, r, i) => {
-            let deepResult = res;
-            r.dimensions.forEach((dim, i) => {
-              if (!deepResult[dim] && i !== (r.dimensions.length - 1)) {
-                deepResult[dim] = {};
-              }
-              if (i === (r.dimensions.length - 1)) deepResult[dim] = path ? r.value[path] : r.value;
-              deepResult = deepResult[dim];
-            })
-            return res;
-          }, {});
-        },
-        setResult: function (result) {
-          instanceResult._result = result;
-          return instanceResult;
-        }
-
-      }
-      return instanceResult.setResult(walker(queryPath.split("."), object));
+      return new InstanceResult(walker(queryPath.split("."), object));
+    },
+    setResult: function (result: object) {
+      return new InstanceResult(result);
     }
 
   };
@@ -122,7 +129,7 @@ type DeepResult = {
 }
 
 function walker(pathArray: Array<string>, object: any, result?: Array<DeepResult>, i: number = 0): Array<DeepResult> {
-  if (pathArray.length == 0) {
+  if (result && pathArray.length == 0) {
     result[i].value = object;
     return result;
   }
@@ -135,14 +142,17 @@ function walker(pathArray: Array<string>, object: any, result?: Array<DeepResult
     Object.keys(object).forEach((key: string, j) => {
       const newResults = { dimensions: [...baseDimensions], value: undefined }
       newResults.dimensions.push(key);
-      const resultIndex = result.length;
-      result[resultIndex] = newResults;
+      let resultIndex;
+      if (result) {
+        resultIndex = result.length;
+        result[resultIndex] = newResults;
+      }
       return walker([...pathArray], object[key], result, resultIndex);
     })
     return result.filter(filterUndefineds);
   }
 
-  return walker(pathArray, object[step], result, i).filter(filterUndefineds);;
+  return walker(pathArray, object[step || ''], result, i).filter(filterUndefineds);;
 }
 
 function filterUndefineds(res: DeepResult) {

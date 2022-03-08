@@ -1,6 +1,6 @@
 {
   "name": "deepwalker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "deepwalker.js",
   "types": "deepwalker.ts",
