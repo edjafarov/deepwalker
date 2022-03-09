@@ -25,7 +25,7 @@ class InstanceResult {
     return this;
   }
   pick = function (this: any, array: Array<any>) {
-    this.result = this.result.map((el) => {
+    this.result = this.result.map((el: any) => {
       return {
         ...el,
         value: Object.fromEntries(
@@ -37,7 +37,7 @@ class InstanceResult {
     return this;
   }
   flatten = function (this: any, array: any = []) {
-    this.result = this.result.reduce((result, el) => {
+    this.result = this.result.reduce((result: any, el: any) => {
 
       const arrayOfValues = Object.keys(el.value).filter(key => array.includes(key)).map((key) => {
 
@@ -55,22 +55,22 @@ class InstanceResult {
     }, []);
     return this;
   }
-  concat = function (this: any, instance) {
+  concat = function (this: any, instance: any) {
     this.result = this.result.concat(instance.result);
     return this;
   }
-  slice = function (this: any, number) {
+  slice = function (this: any, number: any) {
     this.result = this.result.slice(0, number)
     return this;
   }
   toValues = function (this: any) {
-    return this.result.map(r => r.value);
+    return this.result.map((r: any) => r.value);
   }
-  toString = function (this: any, transformer) {
+  toString = function (this: any, transformer: any) {
     if (!this.result || this.result.length == 0) return '';
     return transformer(createResultsObject(this.result))
   }
-  convertEach = function (this: any, converter) {
+  convertEach = function (this: any, converter: any) {
     if (!this.result || this.result.length == 0) return [];
     return this.result.map(converter);
   }
@@ -78,10 +78,10 @@ class InstanceResult {
     if (!this.result || this.result.length == 0) return false;
     return true;
   }
-  toMap = function (this: any, path) {
-    return this.result.reduce((res, r, i) => {
+  toMap = function (this: any, path: any) {
+    return this.result.reduce((res: any, r: any, i: any) => {
       let deepResult = res;
-      r.dimensions.forEach((dim, i) => {
+      r.dimensions.forEach((dim: any, i: any) => {
         if (!deepResult[dim] && i !== (r.dimensions.length - 1)) {
           deepResult[dim] = {};
         }
@@ -91,7 +91,7 @@ class InstanceResult {
       return res;
     }, {});
   }
-  setResult = function (this: any, result) {
+  setResult = function (this: any, result: any) {
     this.result = result;
     return this;
   }
@@ -114,10 +114,10 @@ export function deepwalker(object: any): Deepwalker {
 }
 
 
-function createResultsObject(results) {
+function createResultsObject(results: any) {
   const newResultsObject = [...results] as any;
-  newResultsObject.getOne = (dims) => {
-    return (results.find((result) => !result.dimensions.filter((d, i) => d !== dims[i]).length) || {}).value
+  newResultsObject.getOne = (dims: any) => {
+    return (results.find((result: any) => !result.dimensions.filter((d: any, i: any) => d !== dims[i]).length) || {}).value
   }
   return newResultsObject
 }
