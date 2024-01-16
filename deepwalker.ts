@@ -34,7 +34,7 @@ class InstanceResult {
         );
       }
       const prefix = dimValue[0].replace(/\s/g, "_").toLowerCase();
-      newElement.value = Object.keys(el.value).reduce((res, key) => {
+      newElement.value = Object.keys(el.value).reduce((res: any, key: any) => {
         res[`${prefix}_${key}`] = el.value[key];
         return res;
       }, {});
@@ -62,12 +62,19 @@ class InstanceResult {
       this.result.map((el: any) => {
         return {
           ...el,
-          value: {
-            ...el.value,
-            ...Object.fromEntries(
-              el.dimensions.map((dim: any, i: number) => [names[i], dim])
-            ),
-          },
+          value: Array.isArray(el.value)
+            ? {
+                values: el.value,
+                ...Object.fromEntries(
+                  el.dimensions.map((dim: any, i: number) => [names[i], dim])
+                ),
+              }
+            : {
+                ...el.value,
+                ...Object.fromEntries(
+                  el.dimensions.map((dim: any, i: number) => [names[i], dim])
+                ),
+              },
         };
       })
     );
@@ -81,7 +88,7 @@ class InstanceResult {
       return {
         ...el,
         value: Object.fromEntries(
-          Object.entries(el.value).filter(([key]) => array.includes(key))
+          Object.entries(el.value).filter(([key]: any) => array.includes(key))
         ),
       };
     });
@@ -96,7 +103,9 @@ class InstanceResult {
             dimensions: el.dimensions.concat(key),
             value: {
               ...Object.fromEntries(
-                Object.entries(el.value).filter(([key]) => !array.includes(key))
+                Object.entries(el.value).filter(
+                  ([key]: any) => !array.includes(key)
+                )
               ),
               value: el.value[key],
             },
@@ -120,7 +129,7 @@ class InstanceResult {
   toDimensions = function (this: any, naming: string[]) {
     return this.result.map((r: any) => r.dimensions);
   };
-  toString = function (this: any, transformer: any) {
+  toString = function (this: any, transformer?: any): string {
     if (!this.result || this.result.length == 0) return "";
     return transformer(createResultsObject(this.result));
   };

@@ -1,8 +1,8 @@
 {
   "name": "deepwalker",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "",
-  "main": "deepwalker.js",
+  "main": "deepwalker.ts",
   "types": "deepwalker.ts",
   "scripts": {
     "test": "node ./node_modules/jest/bin/jest.js",
